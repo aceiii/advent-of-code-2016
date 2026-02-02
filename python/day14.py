@@ -2,6 +2,7 @@
 
 import sys
 from hashlib import md5
+from functools import cache
 
 
 def contains_three_in_row(s):
@@ -44,9 +45,39 @@ def part1(lines):
                 return idx
         idx += 1
 
+@cache
+def stretched_hash(key):
+    h = md5(key.encode('ascii')).hexdigest()
+    for i in range(2016):
+        h = md5(h.encode('ascii')).hexdigest()
+    return h
+
+
+def is_key2(prefix, n):
+    key = prefix + str(n)
+    h = stretched_hash(key)
+    c = contains_three_in_row(h);
+    if c is None:
+        return False
+    for i in range(n+1, n+1001):
+        key2 = prefix + str(i)
+        h2 = stretched_hash(key2)
+        if contains_five_in_row(h2) == c:
+            return True
+    return False
+
 
 def part2(lines):
-    pass
+    prefix = lines[0]
+    found = 0
+    target = 64
+    idx = 0
+    while True:
+        if is_key2(prefix, idx):
+            found += 1
+            if found == target:
+                return idx
+        idx += 1
 
 
 def main():

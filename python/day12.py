@@ -56,7 +56,11 @@ def part1(lines):
 
 
 def part2(lines):
-    pass
+    instrs = parse(lines)
+    regs = {'a': 0, 'b': 0, 'c': 1, 'd': 0}
+    ip = 0
+    run(regs, ip, instrs)
+    return regs['a']
 
 
 def main():

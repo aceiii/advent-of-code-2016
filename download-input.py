@@ -1,6 +1,6 @@
 #!/bin/sh
 
-year=2015
+year=2016
 num="$1"
 
 if ! [[ "$num" -gt 0 ]] 2>/dev/null; then

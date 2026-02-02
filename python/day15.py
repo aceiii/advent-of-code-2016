@@ -30,7 +30,13 @@ def part1(lines):
 
 
 def part2(lines):
-    pass
+    discs = parse(lines)
+    discs.append((11, 0))
+    n = 0
+    while True:
+        if sim(discs, n):
+            return n
+        n += 1
 
 
 def main():

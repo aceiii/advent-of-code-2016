@@ -59,11 +59,51 @@ def run_instr(regs, instrs, ip):
         return 1
 
 
-def run(regs, ip, instrs):
+def print_instrs(instrs):
+    for instr in instrs:
+        print(' '.join(str(s) for s in instr))
+
+
+def print_debug(i, ip, instrs, regs, debug):
+    if not debug:
+        return
+    print(i, "=================")
+    print(ip, instrs[ip], regs)
+    print_instrs(instrs)
+    print()
+
+
+def try_run_replacement(regs, instrs, ip, repls):
+    for (repl_instrs, func) in repls:
+        n = len(repl_instrs)
+        if repl_instrs == instrs[ip:ip+n]:
+            return func(regs, instrs, ip)
+    return None
+
+
+def run(regs, ip, instrs, replacements=[], debug=False):
     n = len(instrs)
     i = 0
+
+    repl_map = {}
+    for repl in replacements:
+        repl_instrs, func = repl
+        instr = repl_instrs[0]
+        if instr in repl_map:
+            repl_map[instr].append(repl)
+        else:
+            repl_map[instr] = [repl]
+
     while ip >= 0 and ip < n:
-        ip += run_instr(regs, instrs, ip)
+        print_debug(i, ip, instrs, regs, debug)
+        instr = instrs[ip]
+        res = None
+        if instr in repl_map:
+            res = try_run_replacement(regs, instrs, ip, repl_map[instr])
+        if res is None:
+            ip += run_instr(regs, instrs, ip)
+        else:
+            ip += res
         i += 1
 
 
@@ -75,8 +115,24 @@ def part1(lines):
     return regs['a']
 
 
+def mult_instr(regs, instrs, ip):
+    d = regs['d']
+    b = regs['b']
+    regs['a'] = d * b
+    regs['c'] = 0
+    regs['d'] = 0
+    return 6
+
+
 def part2(lines):
-    pass
+    instrs = parse(lines)
+    regs = {'a': 12, 'b': 0, 'c': 0, 'd': 0}
+    ip = 0
+    replacements = [
+        ([('cpy','b','c'),('inc','a'),('dec','c'),('jnz','c',-2),('dec','d'),('jnz','d',-5)], mult_instr),
+    ]
+    run(regs, ip, instrs, replacements, debug=False)
+    return regs['a']
 
 
 def main():
